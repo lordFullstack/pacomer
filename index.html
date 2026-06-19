@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Pa' Comer POS
-  v2.1.0 — 2026-06-14
+  v2.1.1 — 2026-06-14
   v2.1.0: Proveedores con estado de cuenta real (facturas + abonos),
   pestaña Movimientos en Caja, Cierre como vista predeterminada.
   Módulos: Mesas, Clientes, Proveedores, Caja
@@ -1337,8 +1337,8 @@ function calcTotales() {
   var ingAbonos    = mov.filter(function(m){return m.tipo==='abono'&&m.fechaStr===hoy;}).reduce(function(s,m){return s+m.valor;},0);
   var ingTotal     = ingMesas+ingLlevar+ingDom+ingAbonos;
   var dia          = getDia();
-  var provCaja     = db.proveedores.reduce(function(s,p){return s+(p.pagos||[]).filter(function(x){return x.origen==='caja'&&fechaStr(x.fecha)===hoy;}).reduce(function(a,x){return a+x.valor;},0);},0);
-  var provFondo    = db.proveedores.reduce(function(s,p){return s+(p.pagos||[]).filter(function(x){return x.origen==='fondo'&&fechaStr(x.fecha)===hoy;}).reduce(function(a,x){return a+x.valor;},0);},0);
+  var provCaja     = db.proveedores.reduce(function(s,p){return s+(p.movimientos||[]).filter(function(x){return x.tipo==='pago'&&x.origen==='caja'&&fechaStr(x.fecha)===hoy;}).reduce(function(a,x){return a+x.valor;},0);},0);
+  var provFondo    = db.proveedores.reduce(function(s,p){return s+(p.movimientos||[]).filter(function(x){return x.tipo==='pago'&&x.origen==='fondo'&&fechaStr(x.fecha)===hoy;}).reduce(function(a,x){return a+x.valor;},0);},0);
   var gastosCaja   = (dia.gastos||[]).filter(function(g){return g.origen==='caja';}).reduce(function(s,g){return s+g.valor;},0);
   var gastosFondo  = (dia.gastos||[]).filter(function(g){return g.origen==='fondo';}).reduce(function(s,g){return s+g.valor;},0);
   var egCaja       = provCaja+gastosCaja;
