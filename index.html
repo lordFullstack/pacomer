@@ -2074,7 +2074,7 @@ load().then(function(){
   document.getElementById('splash-name').textContent = db.config.nombre_negocio || 'Pa\'Comer';
 
   var elapsed = Date.now()-splashStart;
-  var wait = Math.max(0, 1200-elapsed);
+  var wait = Math.max(0, 3000-elapsed);
   setTimeout(function(){
     document.getElementById('splash').classList.add('hide');
     setTipo('mesa');
