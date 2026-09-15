@@ -52,10 +52,17 @@ function renderConfig() {
       '<input class="apertura-inp" style="width:100%;margin-bottom:14px" id="cfg-direccion" value="'+(c.direccion||'')+'" placeholder="Ej: Cra 5 # 10-20, Montelíbano">'+
       '<button class="btn btn-accent btn-full" onclick="guardarNegocio()">Guardar datos del negocio</button>'+
     '</div>'+
-    '<div class="card">'+
+    '<div class="card" style="margin-bottom:16px">'+
       '<div class="card-title">👤 Usuarios y PIN de acceso</div>'+
       '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px" id="cfg-usuarios-list"></div>'+
       '<button class="btn btn-ghost btn-full" onclick="abrirModalUsuario()">+ Agregar usuario</button>'+
+    '</div>'+
+    '<div class="card">'+
+      '<div class="card-title">🗄️ Restaurar respaldo</div>'+
+      '<div style="font-size:12px;color:var(--t2);margin-bottom:10px">Restaura clientes, proveedores y configuración desde un archivo exportado. Nunca toca mesas, pagos ni caja — solo agrega lo que falte, nunca sobrescribe un cliente o proveedor que ya exista.</div>'+
+      '<input type="file" id="restore-inp" accept="application/json" style="display:none" onchange="seleccionarArchivoRespaldo(this)">'+
+      '<button class="btn btn-ghost btn-full" onclick="document.getElementById(\'restore-inp\').click()">Elegir archivo de respaldo…</button>'+
+      '<div id="restore-preview"></div>'+
     '</div>';
   renderUsuariosList();
 }
