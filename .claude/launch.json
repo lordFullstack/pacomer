@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pacomer-static",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:\\Users\\USUARIO\\AppData\\Local\\Temp\\claude\\C--Users-USUARIO-OneDrive-Escritorio-repos-JGC-pacomer\\11f460ea-5318-4b53-8bd2-f5b821c12ebc\\scratchpad\\serve.js",
+        "C:\\Users\\USUARIO\\OneDrive\\Escritorio\\repos JGC\\pacomer",
+        "8123"
+      ],
+      "port": 8123
+    }
+  ]
+}

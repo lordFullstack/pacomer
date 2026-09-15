@@ -1,0 +1,29 @@
+// ════════════════════════════════════════════════════════
+// STATS HEADER
+// ════════════════════════════════════════════════════════
+function renderStats() {
+  var ocu = Object.keys(db.mesas).length;
+  var hoyTotal = (db.cajaActual && db.cajaActual.ingresos) ? Number(db.cajaActual.ingresos) : 0;
+  document.getElementById('h-ocupadas').textContent = ocu;
+  document.getElementById('h-hoy').textContent = cop(hoyTotal);
+  document.getElementById('ss-mesas').textContent = ocu;
+  var hoy=Date.now();
+  document.getElementById('ss-llevar').textContent = db.llevar.filter(function(o){return hoy-o.hora<86400000;}).length;
+  document.getElementById('ss-dom').textContent    = db.domicilios.filter(function(o){return hoy-o.hora<86400000;}).length;
+}
+
+function renderTodo() { renderGrid(); renderMesaSel(); renderStats(); }
+
+// ════════════════════════════════════════════════════════
+// ROLES Y PERMISOS
+// ════════════════════════════════════════════════════════
+function aplicarPermisosPorRol(rol) {
+  var esAdmin = rol === 'admin';
+  // Cajero no ve: Proveedores, Caja, Config
+  var btnProv   = document.querySelector('.nav-btn[onclick="navTo(\'proveedores\')"]');
+  var btnCaja   = document.querySelector('.nav-btn[onclick="navTo(\'caja\')"]');
+  var btnConfig = document.querySelector('.nav-btn[onclick="navTo(\'config\')"]');
+  if (btnProv)   btnProv.style.display   = esAdmin ? '' : 'none';
+  if (btnCaja)   btnCaja.style.display   = esAdmin ? '' : 'none';
+  if (btnConfig) btnConfig.style.display = esAdmin ? '' : 'none';
+}
