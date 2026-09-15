@@ -1,7 +1,11 @@
 # HANDOFF LOOP 10 — OFFLINE-FIRST / PWA
 
 ## Estado
-COMPLETADO (infraestructura y lógica). **Pendiente de un paso separado**: desplegar a un hosting HTTPS real (el usuario confirmó que puede ser Vercel) para que la instalación como app y el caché del Service Worker funcionen para los usuarios finales — ver "Riesgos pendientes".
+COMPLETADO — código y despliegue. Publicado en Vercel (plan hobby, cuenta `lordfullstack`, proyecto `pacomer-pos`, vinculado al repo de GitHub `lordFullstack/pacomer`, despliega automáticamente en cada push a `main`).
+
+**URL de producción: https://pacomer-pos.vercel.app**
+
+Verificado directamente contra ese dominio real (no solo `localhost`): HTTPS activo, Service Worker registrado (`https://pacomer-pos.vercel.app/sw.js`, estado `active`), `manifest.json` servido y válido, la app carga y muestra la pantalla de login igual que en local.
 
 ## Restricción técnica que definió el alcance
 Los **Service Workers** (necesarios para caché offline del "cascarón" de la app e instalación como PWA) solo se registran en un **contexto seguro**: `https://` o `http://localhost`. **Nunca funcionan sobre `file://`**, que es como el usuario abre `index.html` hoy (doble clic). Se le preguntó al usuario antes de empezar; confirmó que la app se puede desplegar en Vercel más adelante. Mientras eso no pase, el Service Worker simplemente no se registra en el flujo `file://` actual (el código detecta esto y no falla, ver `js/14-init.js`) — la app sigue funcionando exactamente igual que antes, solo sin caché offline del cascarón.
@@ -46,9 +50,9 @@ Contra el backend real, sirviendo la app por HTTP local (`localhost`, donde el S
 2. No había herramienta de conversión de imágenes disponible (ni ImageMagick ni similar) para generar los iconos PNG del manifest — se resolvió con un script Node que codifica PNG a mano (sin dependencias externas), ver `icons/`.
 
 ## Riesgos pendientes
-1. **Necesita un hosting HTTPS real para que la instalación como app y el caché offline sirvan de algo para el usuario final** — hoy el Service Worker nunca se registra en el flujo `file://` que usan a diario. El usuario mencionó Vercel como opción; **no se desplegó nada todavía**, queda como siguiente paso a confirmar aparte.
+1. **`https://pacomer-pos.vercel.app` es un dominio nuevo, todavía no comunicado a los usuarios finales** — hoy la operación real del restaurante sigue siendo `file://` (doble clic); usar el dominio de Vercel como principal (para que la PWA se pueda instalar de verdad) es una decisión aparte que el usuario debe tomar y comunicar a su equipo.
 2. El `CACHE_NAME` (`pacomer-shell-v1`) hay que incrementarlo manualmente cada vez que se publique una versión nueva de los archivos estáticos, si no los usuarios con la PWA instalada seguirían viendo una versión cacheada vieja hasta que el Service Worker note el cambio — no hay un mecanismo de invalidación automática basado en contenido en esta primera versión.
 3. Si dos dispositivos distintos quedan offline y ambos registran algo en la **misma mesa** antes de que cualquiera sincronice, cada uno sincronizará por su lado sin verse entre sí hasta que ambos tengan internet — el orden final en el servidor dependerá de quién sincronice primero (no hay conflicto de datos, solo pueden intercalarse en un orden distinto al que ocurrieron en la vida real). Caso límite, no cubierto explícitamente por el spec.
 
 ## Siguiente paso
-Definir con el usuario si se despliega ahora a Vercel (para poder probar Service Worker + instalación con un dominio real) o se deja pendiente. Después: LOOP 11 — Auditoría y seguridad (UI de consulta del `audit_events` ya existente + RPC de anulación de pagos, que hoy no existe).
+LOOP 11 — Auditoría y seguridad (UI de consulta del `audit_events` ya existente + RPC de anulación de pagos, que hoy no existe).
