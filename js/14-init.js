@@ -15,5 +15,15 @@ load().then(function(){
     renderTodo();
     setInterval(function(){ renderGrid(); renderStats(); }, 60000);
     cargarPantallaLogin();
+    actualizarBadgeSync();
+    sincronizarCola();
   }, wait);
 });
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').catch(function(err) {
+      console.warn('No se pudo registrar el service worker:', err);
+    });
+  });
+}

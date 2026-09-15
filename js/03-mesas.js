@@ -173,13 +173,16 @@ function registrar() {
   if (ui.regTipo==='mesa') {
     var tableId = db.tablesByLabel[String(ui.regMesa)];
     if (!tableId) { toast('Mesa no configurada en el sistema','err'); return; }
-    sb.rpc('abrir_orden', { p_channel:'mesa', p_table_id: tableId, p_idempotency_key: uid() }).then(function(ra){
-      if (ra.error) { toast('Error: '+ra.error.message,'err'); return; }
-      sb.rpc('agregar_persona', { p_table_session_id: ra.data.table_session_id, p_nombre: null, p_descriptor: null, p_valor: ui.regValor, p_nota: nota||null, p_idempotency_key: uid() }).then(function(rp){
-        if (rp.error) { toast('Error: '+rp.error.message,'err'); return; }
-        toast('Mesa '+ui.regMesa+' — '+cop(ui.regValor)+' registrado');
-        limpiarReg(); cargarMesas().then(renderTodo);
-      });
+    var mesaNumReg = ui.regMesa, valorReg = ui.regValor;
+    agregarConsumoMesaConCola(tableId, mesaNumReg, valorReg, null, nota||null).then(function(r){
+      if (!r.ok) { toast('Error: '+r.error,'err'); return; }
+      if (r.offline) {
+        toast('Sin conexión — Mesa '+mesaNumReg+' guardada, se sincronizará automáticamente');
+        limpiarReg();
+        return;
+      }
+      toast('Mesa '+mesaNumReg+' — '+cop(valorReg)+' registrado');
+      limpiarReg(); cargarMesas().then(renderTodo);
     });
     return;
   }

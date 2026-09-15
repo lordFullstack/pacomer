@@ -38,6 +38,7 @@ header {
 .hstats { display: flex; gap: 10px; }
 .hchip { background: var(--s2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--t2); }
 .hchip strong { color: var(--t1); }
+#sync-badge { border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
 /* ── PÁGINAS ── */
 .page { display: none; flex: 1; overflow: hidden; }

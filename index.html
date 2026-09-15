@@ -11,6 +11,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pa' Comer POS</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f0f0f">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -62,6 +65,7 @@
   <div class="hstats">
     <div class="hchip"><span class="dot dot-accent" style="margin-right:5px"></span>Ocupadas: <strong id="h-ocupadas">0</strong></div>
     <div class="hchip">💰 Hoy: <strong id="h-hoy">$0</strong></div>
+    <div class="hchip" id="sync-badge" style="display:none"></div>
   </div>
 </header>
 
@@ -339,6 +343,7 @@
 <script src="js/10-ticket.js"></script>
 <script src="js/11-configuracion.js"></script>
 <script src="js/12-auth.js"></script>
-<script src="js/13-init.js"></script>
+<script src="js/13-offline-sync.js"></script>
+<script src="js/14-init.js"></script>
 </body>
 </html>

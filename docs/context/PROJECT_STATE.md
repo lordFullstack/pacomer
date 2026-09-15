@@ -1,6 +1,9 @@
 # PROJECT STATE
 
-_Actualizado: Integración front-end completa + LOOP 08A + Reestructuración de archivos + LOOP 09 — 2026-09-15_
+_Actualizado: Integración front-end completa + LOOP 08A + Reestructuración de archivos + LOOP 09 + LOOP 10 — 2026-09-15_
+
+## LOOP 10 — Offline-first / PWA (COMPLETO el código; falta desplegar)
+`manifest.json` + `sw.js` (cachea el cascarón estático, nunca Supabase) + cola de sincronización en IndexedDB (`js/13-offline-sync.js`). Solo se encola "agregar consumo a una mesa" (Mesas y Quick Service) — nada que mueva dinero se pone en cola nunca (decisión de producto, ver handoff). Probado end-to-end: registrar sin internet, reconectar, sincroniza solo, sin duplicar sesiones de mesa. **Pendiente real**: los Service Workers no funcionan sobre `file://` (como abren la app hoy) — el usuario confirmó que se puede desplegar en Vercel, pero eso todavía no se hizo. Ver `docs/context/HANDOFF_LOOP_10.md`.
 
 ## LOOP 09 — Responsive secundario (COMPLETO)
 Clientes y Proveedores pasan a un patrón "drill-down" en móvil (≤768px): lista y detalle ya no van lado a lado, se ve una pantalla a la vez con botón "← Volver". Caja (pestañas, hero del día, grid de ingresos/egresos, fila de gasto manual) y Configuración (fix de bug: no tenía padding/scroll propio) se reflowan a una columna. Header compartido pasa a dos filas en vez de desbordar. Cero cambios en desktop (verificado a 1400px) y cero cambios en la composición de Mesas. "Dashboard" mencionado en el spec del loop no existe como página en el front-end — sigue pendiente. Ver `docs/context/HANDOFF_LOOP_09.md`.
@@ -23,7 +26,7 @@ De paso se corrigieron 2 bugs pre-existentes reales: `crypto.randomUUID` sin res
 "Pa Comer" (`920201cb-b3d4-4d29-bed1-f6f628463a6e`) quedó **sin ningún usuario** a propósito — quien abra la app por primera vez debe crear el administrador real con su propio nombre y PIN a través del formulario de arranque. Las 20 mesas reales ya están sembradas en `public.tables`.
 
 ## Pendiente real (no de integración, de producto)
-Con la integración completa, la app ya es funcional de punta a punta contra el backend real. Lo que queda del plan original de 14 loops: Loop 10 (Offline/PWA), Loop 11 (Auditoría — UI de consulta + RPC de anulación de pagos), Loop 12 (Backup/recuperación real), Loop 13 (QA operativo formal), Loop 14 (Optimización y entrega). Loop 09 (Responsive secundario) ya está completo — ver arriba.
+Con la integración completa, la app ya es funcional de punta a punta contra el backend real. Lo que queda del plan original de 14 loops: Loop 11 (Auditoría — UI de consulta + RPC de anulación de pagos), Loop 12 (Backup/recuperación real), Loop 13 (QA operativo formal), Loop 14 (Optimización y entrega). Loops 09 y 10 ya están completos — ver arriba. Loop 10 necesita además un despliegue a hosting HTTPS (Vercel, a confirmar) para que el Service Worker sirva de algo.
 
 ## Loops completados
 - Loop 01: auditoría base.
@@ -35,6 +38,7 @@ Con la integración completa, la app ya es funcional de punta a punta contra el 
 - Loop 07: flujo de caja completo (apertura → operación → **arqueo** → cierre, `COUNTING` ahora sí bloquea operaciones), `reabrir_caja` (admin-only, pendiente desde Loop 03), rastro de usuario en cada paso, `cash_session_detail` con esperado recalculado en vivo.
 - Loop 08: `dashboard_resumen(periodo)` — todos los KPI obligatorios (ventas, mesas, crédito, proveedores, caja, operación) con filtros Hoy/7d/30d, admin-only, verificado campo por campo contra un escenario armado a mano. `anulaciones`/`correcciones` quedan en 0/`null` honestamente porque todavía no existe el mecanismo que los alimente (Loop 11).
 - Loop 09: responsive de Clientes, Proveedores, Caja y Configuración (drill-down en móvil, grids que colapsan a una columna, fix de bug en Configuración). Cero cambios en desktop ni en Mesas. "Dashboard" del spec no existe como página, queda pendiente real.
+- Loop 10: manifest + Service Worker (cascarón estático, nunca Supabase) + cola de sincronización en IndexedDB para "agregar consumo a una mesa" (Mesas y Quick Service) — nada que mueva dinero se encola nunca. Probado en vivo: registrar sin internet, reconectar, sincroniza solo, sin duplicar sesiones. Falta desplegar a HTTPS para que la instalación/caché real sirvan.
 
 **Falta conectar `index.html` al backend nuevo — requiere reescribir su capa de datos, esfuerzo grande pendiente de confirmación, ver `docs/context/HANDOFF_LOOP_04.md`.**
 
