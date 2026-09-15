@@ -19,13 +19,15 @@ function renderTodo() { renderGrid(); renderMesaSel(); renderStats(); }
 // ════════════════════════════════════════════════════════
 function aplicarPermisosPorRol(rol) {
   var esAdmin = rol === 'admin';
-  // Cajero no ve: Proveedores, Caja, Config, Auditoría
+  // Cajero no ve: Proveedores, Caja, Dashboard, Config, Auditoría
   var btnProv   = document.querySelector('.nav-btn[onclick="navTo(\'proveedores\')"]');
   var btnCaja   = document.querySelector('.nav-btn[onclick="navTo(\'caja\')"]');
+  var btnDash   = document.querySelector('.nav-btn[onclick="navTo(\'dashboard\')"]');
   var btnConfig = document.querySelector('.nav-btn[onclick="navTo(\'config\')"]');
   var btnAudit  = document.querySelector('.nav-btn[onclick="navTo(\'auditoria\')"]');
   if (btnProv)   btnProv.style.display   = esAdmin ? '' : 'none';
   if (btnCaja)   btnCaja.style.display   = esAdmin ? '' : 'none';
+  if (btnDash)   btnDash.style.display   = esAdmin ? '' : 'none';
   if (btnConfig) btnConfig.style.display = esAdmin ? '' : 'none';
   if (btnAudit)  btnAudit.style.display  = esAdmin ? '' : 'none';
 }

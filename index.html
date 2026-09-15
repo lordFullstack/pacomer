@@ -59,6 +59,7 @@
     <button class="nav-btn" onclick="navTo('clientes')">👤 Clientes</button>
     <button class="nav-btn" onclick="navTo('proveedores')">🏪 Proveedores</button>
     <button class="nav-btn" onclick="navTo('caja')">📊 Caja</button>
+    <button class="nav-btn" onclick="navTo('dashboard')">📈 Dashboard</button>
     <button class="nav-btn" onclick="navTo('config')">⚙️ Config</button>
     <button class="nav-btn" onclick="navTo('auditoria')">📋 Auditoría</button>
   </nav>
@@ -191,6 +192,11 @@
   <div class="caja-view"        id="cview-dia"></div>
   <div class="caja-view active" id="cview-cierre"></div>
   <div class="caja-view"        id="cview-movimientos"></div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div class="page" id="page-dashboard">
+  <div id="dashboard-content"></div>
 </div>
 
 <!-- ══ CONFIGURACIÓN ══ -->
@@ -351,6 +357,7 @@
 <script src="js/12-auth.js"></script>
 <script src="js/13-offline-sync.js"></script>
 <script src="js/14-auditoria.js"></script>
-<script src="js/15-init.js"></script>
+<script src="js/15-dashboard.js"></script>
+<script src="js/16-init.js"></script>
 </body>
 </html>

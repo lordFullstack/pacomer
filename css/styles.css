@@ -605,7 +605,7 @@ header {
    CONFIGURACIÓN — fix base (bug pre-existente: la página
    no tenía padding ni scroll propio, ver LOOP_09)
 ════════════════════════════════════════ */
-#page-config { padding: 20px; overflow-y: auto; }
+#page-config, #page-dashboard, #page-auditoria { padding: 20px; overflow-y: auto; }
 
 /* ════════════════════════════════════════
    LOOP 09 — RESPONSIVE SECUNDARIO

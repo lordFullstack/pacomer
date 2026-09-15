@@ -1,6 +1,9 @@
 # PROJECT STATE
 
-_Actualizado: Integración front-end completa + LOOP 08A + Reestructuración de archivos + LOOP 09 + LOOP 10 + LOOP 11 + LOOP 12 — 2026-09-15_
+_Actualizado: Integración front-end completa + LOOP 08A + Reestructuración de archivos + LOOP 09 + LOOP 10 + LOOP 11 + LOOP 12 + Dashboard — 2026-09-15_
+
+## Dashboard gerencial (COMPLETO)
+Pedido directo del usuario tras revisar la app: pantalla con visión general del negocio. Cierra un hueco señalado desde el Loop 08 — `dashboard_resumen` (la RPC) existía pero nunca se construyó una página para mostrarla. Se agregó `flujo` (ingresos/gastos/saldo, no existía) y períodos `mes`/`año` (antes solo hoy/7d/30d) a la RPC, más la pantalla `#page-dashboard` (admin-only, mismo patrón de protección que Caja/Auditoría). Probado con datos reales: matemática de ingresos/egresos/saldo verificada. Ver `docs/context/HANDOFF_DASHBOARD.md`.
 
 ## LOOP 12 — Respaldo y recuperación (COMPLETO)
 El respaldo/restauración anteriores eran una trampa: exportaba solo lo cargado en pantalla y el importador escribía a tablas legacy inexistentes — nunca hubo un respaldo ni restauración reales. Ahora `exportarRespaldo()` trae 26 tablas reales del tenant (sin credenciales). La restauración, con alcance acordado explícitamente con el usuario (solo datos de referencia — nunca mesas/pagos/caja, por riesgo de corromper dinero real), valida todo el archivo antes de escribir nada, muestra una vista previa (qué se crearía vs qué se omite por ya existir), y reutiliza `crear_cliente`/`crear_proveedor`/`actualizar_config` para quedar auditada automáticamente. Ver `docs/context/HANDOFF_LOOP_12.md`.
@@ -66,7 +69,9 @@ Pa' Comer POS v3.0.0 (front-end, `index.html` del repo). Confirmado byte-idénti
 - Clientes
 - Proveedores
 - Caja
+- Dashboard (admin-only, Loop Dashboard)
 - Configuración
+- Auditoría (admin-only, Loop 11)
 
 ## Protected area
 

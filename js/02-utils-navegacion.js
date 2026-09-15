@@ -57,6 +57,7 @@ function navTo(page) {
   if (page==='caja')        { cargarCajaActual().then(function(){ setCajaTab(ui.cajaTab||'cierre'); }); }
   if (page==='config')      { cargarConfigNegocio(); cargarUsuarios(); }
   if (page==='auditoria')   { cargarAuditoria(); }
+  if (page==='dashboard')   { cargarDashboard(); }
 }
 
 function openOverlay(id) { document.getElementById(id).classList.add('on'); }
