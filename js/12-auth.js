@@ -64,6 +64,8 @@ function pinPress(n) {
           aplicarPermisosPorRol(usr.rol);
           document.getElementById('pin-gate').style.display = 'none';
           toast('Hola, '+usr.nombre+' 👋');
+          renderHeaderUsuario(usr);
+          sb.rpc('registrar_evento_sesion', { p_accion: 'login' }).then(function(rl){ if (rl.error) console.warn('auditoria login', rl.error); });
           cargarClientes();
           cargarProveedores();
           cargarConfigNegocio();
@@ -101,5 +103,32 @@ function crearAdminBootstrap() {
     document.getElementById('bs-nombre').value = '';
     document.getElementById('bs-pin').value = '';
     cargarPantallaLogin();
+  });
+}
+
+function renderHeaderUsuario(usr) {
+  var el = document.getElementById('header-usuario-info');
+  el.innerHTML = '<span>👤 <strong>'+usr.nombre+'</strong> <span class="role-badge role-'+usr.rol+'">'+(usr.rol==='admin'?'Admin':'Cajero')+'</span></span>'+
+    '<button class="btn btn-ghost" style="padding:4px 10px;font-size:11px;margin-left:8px" onclick="cerrarSesion()">Salir</button>';
+  el.style.display = 'flex';
+}
+
+function cerrarSesion() {
+  sb.rpc('registrar_evento_sesion', { p_accion: 'logout' }).then(function(r) {
+    if (r.error) console.warn('auditoria logout', r.error);
+    sb.auth.signOut().then(function() {
+      ui.usuarioActual = null;
+      db.usuarioActivo = null;
+      document.getElementById('header-usuario-info').style.display = 'none';
+      document.getElementById('header-usuario-info').innerHTML = '';
+      navTo('mesas');
+      document.getElementById('pin-gate').style.display = '';
+      pinBuffer = ''; pinUsuarioSel = null;
+      document.getElementById('pg-padwrap').style.display = 'none';
+      document.getElementById('pg-users').style.display = '';
+      document.getElementById('pg-title').textContent = '¿Quién eres?';
+      cargarPantallaLogin();
+      toast('Sesión cerrada');
+    });
   });
 }

@@ -1,6 +1,9 @@
 # PROJECT STATE
 
-_Actualizado: Integración front-end completa + LOOP 08A + Reestructuración de archivos + LOOP 09 + LOOP 10 — 2026-09-15_
+_Actualizado: Integración front-end completa + LOOP 08A + Reestructuración de archivos + LOOP 09 + LOOP 10 + LOOP 11 — 2026-09-15_
+
+## LOOP 11 — Auditoría y seguridad (COMPLETO)
+Todas las RPC mutantes ya auditaban (venta, cobro, fiado, abono, corrección, liberación, gasto, pago proveedor, apertura/cierre/reapertura de caja, config) desde loops anteriores — lo único que faltaba del spec era login/logout (logout ni siquiera existía como función). Se agregó `registrar_evento_sesion` (RPC), botón real de "Salir" en el header, y una pantalla de Auditoría (`listar_auditoria`, admin-only) con filtros por fecha/usuario/módulo/acción. Se endureció además la política RLS de `audit_events`: antes cualquier usuario autenticado del tenant podía leer todo el rastro directo por PostgREST, ahora solo admin — verificado con una cuenta cajero real (0 filas por select directo, RPC rechaza explícitamente). Ver `docs/context/HANDOFF_LOOP_11.md`.
 
 ## LOOP 10 — Offline-first / PWA (COMPLETO, desplegado)
 `manifest.json` + `sw.js` (cachea el cascarón estático, nunca Supabase) + cola de sincronización en IndexedDB (`js/13-offline-sync.js`). Solo se encola "agregar consumo a una mesa" (Mesas y Quick Service) — nada que mueva dinero se pone en cola nunca (decisión de producto, ver handoff). Probado end-to-end: registrar sin internet, reconectar, sincroniza solo, sin duplicar sesiones de mesa. **Desplegado en Vercel: https://pacomer-pos.vercel.app** (proyecto `pacomer-pos`, vinculado a `lordFullstack/pacomer`, redeploy automático en cada push a `main`) — Service Worker y manifest verificados activos en ese dominio real. El flujo `file://` de siempre sigue funcionando igual, sin Service Worker (no rompe nada). Ver `docs/context/HANDOFF_LOOP_10.md`.
@@ -26,7 +29,7 @@ De paso se corrigieron 2 bugs pre-existentes reales: `crypto.randomUUID` sin res
 "Pa Comer" (`920201cb-b3d4-4d29-bed1-f6f628463a6e`) quedó **sin ningún usuario** a propósito — quien abra la app por primera vez debe crear el administrador real con su propio nombre y PIN a través del formulario de arranque. Las 20 mesas reales ya están sembradas en `public.tables`.
 
 ## Pendiente real (no de integración, de producto)
-Con la integración completa, la app ya es funcional de punta a punta contra el backend real. Lo que queda del plan original de 14 loops: Loop 11 (Auditoría — UI de consulta + RPC de anulación de pagos), Loop 12 (Backup/recuperación real), Loop 13 (QA operativo formal), Loop 14 (Optimización y entrega). Loops 09 y 10 ya están completos — ver arriba. Loop 10 necesita además un despliegue a hosting HTTPS (Vercel, a confirmar) para que el Service Worker sirva de algo.
+Con la integración completa, la app ya es funcional de punta a punta contra el backend real. Lo que queda del plan original de 14 loops: Loop 12 (Backup/recuperación real — hoy el "respaldo" es solo una copia local de lo que se ve en pantalla), Loop 13 (QA operativo formal), Loop 14 (Optimización y entrega). Loops 09, 10 y 11 ya están completos — ver arriba.
 
 ## Loops completados
 - Loop 01: auditoría base.
@@ -38,7 +41,8 @@ Con la integración completa, la app ya es funcional de punta a punta contra el 
 - Loop 07: flujo de caja completo (apertura → operación → **arqueo** → cierre, `COUNTING` ahora sí bloquea operaciones), `reabrir_caja` (admin-only, pendiente desde Loop 03), rastro de usuario en cada paso, `cash_session_detail` con esperado recalculado en vivo.
 - Loop 08: `dashboard_resumen(periodo)` — todos los KPI obligatorios (ventas, mesas, crédito, proveedores, caja, operación) con filtros Hoy/7d/30d, admin-only, verificado campo por campo contra un escenario armado a mano. `anulaciones`/`correcciones` quedan en 0/`null` honestamente porque todavía no existe el mecanismo que los alimente (Loop 11).
 - Loop 09: responsive de Clientes, Proveedores, Caja y Configuración (drill-down en móvil, grids que colapsan a una columna, fix de bug en Configuración). Cero cambios en desktop ni en Mesas. "Dashboard" del spec no existe como página, queda pendiente real.
-- Loop 10: manifest + Service Worker (cascarón estático, nunca Supabase) + cola de sincronización en IndexedDB para "agregar consumo a una mesa" (Mesas y Quick Service) — nada que mueva dinero se encola nunca. Probado en vivo: registrar sin internet, reconectar, sincroniza solo, sin duplicar sesiones. Falta desplegar a HTTPS para que la instalación/caché real sirvan.
+- Loop 10: manifest + Service Worker (cascarón estático, nunca Supabase) + cola de sincronización en IndexedDB para "agregar consumo a una mesa" (Mesas y Quick Service) — nada que mueva dinero se encola nunca. Probado en vivo: registrar sin internet, reconectar, sincroniza solo, sin duplicar sesiones. Desplegado en Vercel.
+- Loop 11: `registrar_evento_sesion` (login/logout, únicos eventos del spec que faltaban — el resto de RPC mutantes ya auditaban desde loops anteriores), botón real de "Salir" (no existía), pantalla Auditoría admin-only (`listar_auditoria`) con filtros. RLS de `audit_events` endurecida a admin-only (antes cualquier usuario autenticado del tenant podía leerla completa).
 
 **Falta conectar `index.html` al backend nuevo — requiere reescribir su capa de datos, esfuerzo grande pendiente de confirmación, ver `docs/context/HANDOFF_LOOP_04.md`.**
 

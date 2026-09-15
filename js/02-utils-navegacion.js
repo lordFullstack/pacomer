@@ -56,6 +56,7 @@ function navTo(page) {
   if (page==='proveedores') { cargarProveedores(); }
   if (page==='caja')        { cargarCajaActual().then(function(){ setCajaTab(ui.cajaTab||'cierre'); }); }
   if (page==='config')      { cargarConfigNegocio(); cargarUsuarios(); }
+  if (page==='auditoria')   { cargarAuditoria(); }
 }
 
 function openOverlay(id) { document.getElementById(id).classList.add('on'); }
