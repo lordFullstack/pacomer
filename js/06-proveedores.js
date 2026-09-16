@@ -1,33 +1,65 @@
 // ════════════════════════════════════════════════════════
 // MÓDULO PROVEEDORES
 // ════════════════════════════════════════════════════════
-// Estructura proveedor: { id, nombre, tel, categoria, nota, saldo,
-//   movimientos: [{id, tipo:'factura'|'pago', desc, valor, origen, fecha}]|null (lazy) }
+// Estructura proveedor: { id, nombre, tel, categoria, nota, saldo, saldoVencido,
+//   compras: [{id, desc, monto, pendiente, status, dueDate, fecha}]|null (lazy),
+//   pagos:   [{id, desc, valor, origen, fecha}]|null (lazy) }
 
 function saldoProv(p) { return p.saldo||0; }
+
+var PROV_STATUS_LABEL = {PENDIENTE:'Pendiente', PARCIAL:'Parcial', PAGADA:'Pagada', VENCIDA:'Vencida'};
+var PROV_STATUS_BADGE = {PENDIENTE:'badge-blue', PARCIAL:'badge-accent', PAGADA:'badge-green', VENCIDA:'badge-red'};
+var PROV_STATUS_CLASS = {PENDIENTE:'st-pendiente', PARCIAL:'st-parcial', PAGADA:'st-pagada', VENCIDA:'st-vencida'};
+var PROV_STATUS_PRIORIDAD = {VENCIDA:0, PARCIAL:1, PENDIENTE:2, PAGADA:3};
 
 function cargarProveedores() {
   return Promise.all([
     sb.from('suppliers').select('id,name,phone,category,notes'),
-    sb.from('supplier_balances').select('supplier_id,saldo')
+    sb.from('supplier_balances').select('supplier_id,saldo,saldo_vencido')
   ]).then(function(r){
     if (r[0].error) { sbErr(r[0].error,'cargar proveedores'); return; }
-    var saldoPorId = {};
-    (r[1].data||[]).forEach(function(b){ saldoPorId[b.supplier_id] = Number(b.saldo); });
+    var saldoPorId = {}, vencidoPorId = {};
+    (r[1].data||[]).forEach(function(b){ saldoPorId[b.supplier_id] = Number(b.saldo); vencidoPorId[b.supplier_id] = Number(b.saldo_vencido); });
     db.proveedores = (r[0].data||[]).map(function(p){
-      return {id:p.id, nombre:p.name, tel:p.phone||'', categoria:p.category||'', nota:p.notes||'', saldo:saldoPorId[p.id]||0, movimientos:null};
+      return {id:p.id, nombre:p.name, tel:p.phone||'', categoria:p.category||'', nota:p.notes||'', saldo:saldoPorId[p.id]||0, saldoVencido:vencidoPorId[p.id]||0, compras:null, pagos:null};
     });
     renderProvList();
   });
 }
 
+function diasHasta(fechaISO) {
+  if (!fechaISO) return null;
+  var hoy = new Date();
+  var hoyUTC = Date.UTC(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+  var due = new Date(fechaISO+'T00:00:00Z').getTime();
+  return Math.round((due-hoyUTC)/86400000);
+}
+
+function labelVencimiento(fechaISO, status) {
+  if (!fechaISO) return 'Sin fecha de vencimiento';
+  var d = diasHasta(fechaISO);
+  if (d===0) return 'Vence hoy';
+  if (d>0) return 'Vence en '+d+(d===1?' día':' días');
+  return 'Venció hace '+Math.abs(d)+(Math.abs(d)===1?' día':' días');
+}
+
 function cargarMovimientosProveedor(pid) {
   Promise.all([
-    sb.from('purchases').select('id,amount,invoice_number,created_at').eq('supplier_id',pid),
+    sb.from('purchase_detail').select('purchase_id,amount,pending,status,invoice_number,order_date,due_date,created_at').eq('supplier_id',pid),
     sb.from('supplier_payments').select('id,applied_amount,created_at').eq('supplier_id',pid).eq('status','ACTIVE')
   ]).then(function(r){
-    var facturas = (r[0].data||[]).map(function(x){
-      return {id:x.id, tipo:'factura', desc:x.invoice_number?('Factura '+x.invoice_number):'Factura proveedor', valor:Number(x.amount), fecha:new Date(x.created_at).getTime()};
+    if (r[0].error) { sbErr(r[0].error,'cargar compras del proveedor'); return; }
+    var compras = (r[0].data||[]).map(function(x){
+      return {id:x.purchase_id, desc:x.invoice_number?('Factura '+x.invoice_number):'Compra proveedor',
+        monto:Number(x.amount), pendiente:Number(x.pending), status:x.status, dueDate:x.due_date,
+        fecha:new Date(x.created_at).getTime()};
+    }).sort(function(a,b){
+      var pa=PROV_STATUS_PRIORIDAD[a.status], pb=PROV_STATUS_PRIORIDAD[b.status];
+      if (pa!==pb) return pa-pb;
+      if (a.dueDate&&b.dueDate) return a.dueDate<b.dueDate?-1:a.dueDate>b.dueDate?1:0;
+      if (a.dueDate) return -1;
+      if (b.dueDate) return 1;
+      return a.fecha-b.fecha;
     });
     var pagos = (r[1].data||[]);
     var pagoIds = pagos.map(function(x){return x.id;});
@@ -39,11 +71,12 @@ function cargarMovimientosProveedor(pid) {
       (rt.data||[]).forEach(function(t){ metodoPorPago[t.payment_id] = t.method; });
       var pagosMap = pagos.map(function(x){
         var metodo = metodoPorPago[x.id];
-        return {id:x.id, tipo:'pago', desc:'Pago a proveedor', valor:Number(x.applied_amount), origen:metodo==='efectivo'?'caja':'fondo', fecha:new Date(x.created_at).getTime()};
-      });
+        return {id:x.id, desc:'Pago a proveedor', valor:Number(x.applied_amount), origen:metodo==='efectivo'?'caja':'fondo', fecha:new Date(x.created_at).getTime()};
+      }).sort(function(a,b){return b.fecha-a.fecha;});
       var p = db.proveedores.find(function(x){return x.id===pid;});
       if (!p) return;
-      p.movimientos = facturas.concat(pagosMap).sort(function(a,b){return a.fecha-b.fecha;});
+      p.compras = compras;
+      p.pagos = pagosMap;
       if (ui.provSel===pid) renderProvDetail();
     });
   });
@@ -56,9 +89,13 @@ function renderProvList() {
   if (!filtrados.length) { list.innerHTML='<div class="empty"><div class="empty-icon">🏪</div><div>Sin proveedores</div></div>'; return; }
   list.innerHTML = filtrados.map(function(p){
     var saldo = saldoProv(p);
+    var vencido = p.saldoVencido||0;
     return '<div class="prov-item'+(ui.provSel===p.id?' sel':'')+'" onclick="selProv(\''+p.id+'\')">'+
       '<div><div class="prov-item-name">'+p.nombre+'</div><div class="prov-item-cat">'+(p.categoria||'')+'</div></div>'+
-      '<div class="prov-item-total" style="color:'+(saldo>0?'var(--red)':saldo<0?'var(--green)':'var(--t3)')+'">'+(saldo>0?cop(saldo):saldo<0?'A favor '+cop(-saldo):'✓')+'</div>'+
+      '<div style="text-align:right">'+
+        '<div class="prov-item-total" style="color:'+(saldo>0?'var(--red)':saldo<0?'var(--green)':'var(--t3)')+'">'+(saldo>0?cop(saldo):saldo<0?'A favor '+cop(-saldo):'✓')+'</div>'+
+        (vencido>0?'<div class="prov-item-vencido">Vencido '+cop(vencido)+'</div>':'')+
+      '</div>'+
       '</div>';
   }).join('');
   var deudaTotal = db.proveedores.reduce(function(s,p){ var sd=saldoProv(p); return s+(sd>0?sd:0); },0);
@@ -83,10 +120,12 @@ function renderProvDetail() {
   var det = document.getElementById('prov-detail');
   if (!p) { det.innerHTML='<div class="empty" style="margin:auto"><div class="empty-icon">🏪</div><div class="empty-title">Selecciona un proveedor</div></div>'; return; }
 
-  var movs     = p.movimientos||[];
+  var compras  = p.compras||[];
+  var pagos    = p.pagos||[];
   var saldo    = saldoProv(p);
-  var totalFac = movs.filter(function(m){return m.tipo==='factura';}).reduce(function(s,m){return s+m.valor;},0);
-  var totalPag = movs.filter(function(m){return m.tipo==='pago';}).reduce(function(s,m){return s+m.valor;},0);
+  var vencido  = p.saldoVencido||0;
+  var totalFac = compras.reduce(function(s,m){return s+m.monto;},0);
+  var totalPag = pagos.reduce(function(s,m){return s+m.valor;},0);
   var deuda    = saldo > 0;
 
   det.innerHTML =
@@ -103,6 +142,7 @@ function renderProvDetail() {
         '<div>'+
           '<div class="saldo-banner-label">'+(deuda?'Deuda pendiente':saldo<0?'Saldo a favor':'Al día')+'</div>'+
           '<div style="font-size:11px;color:var(--t3);margin-top:2px">Facturado: '+cop(totalFac)+' · Pagado: '+cop(totalPag)+'</div>'+
+          (vencido>0?'<div style="font-size:11px;color:var(--red);font-weight:600;margin-top:2px">⚠ Vencido: '+cop(vencido)+'</div>':'')+
         '</div>'+
         '<div class="saldo-banner-val '+(deuda?'deuda':'ok')+'">'+(deuda?cop(saldo):saldo<0?cop(-saldo):'✓ $0')+'</div>'+
       '</div>'+
@@ -132,22 +172,43 @@ function renderProvDetail() {
         '<input class="pago-desc-inp" id="pago-desc" placeholder="Nota del pago (opcional)" type="text">'+
       '</div>' : '')+
 
-      // HISTORIAL
-      '<div class="lbl">Estado de cuenta ('+movs.length+' movimientos)</div>'+
-      (movs.length ? [...movs].reverse().map(function(m){
-        var esFac = m.tipo==='factura';
+      // COMPRAS / CUENTAS POR PAGAR
+      '<div class="lbl">Cuentas por pagar ('+compras.length+' compras)</div>'+
+      (compras.length ? compras.map(function(c){
+        var stClass = PROV_STATUS_CLASS[c.status]||'st-pendiente';
+        var stBadge = PROV_STATUS_BADGE[c.status]||'badge-blue';
+        var stLabel = PROV_STATUS_LABEL[c.status]||c.status;
+        var pagada  = c.status==='PAGADA';
+        var vencText= pagada ? '' : labelVencimiento(c.dueDate, c.status);
+        return '<div class="compra-item '+stClass+'">'+
+          '<div class="compra-item-top">'+
+            '<div class="compra-item-desc">'+c.desc+'</div>'+
+            '<span class="badge '+stBadge+'">'+stLabel+'</span>'+
+          '</div>'+
+          '<div class="compra-item-meta">'+
+            '<span class="compra-item-monto">'+cop(c.monto)+'</span>'+
+            '<span class="compra-item-venc'+(c.status==='VENCIDA'?' vencida':'')+'">'+vencText+'</span>'+
+          '</div>'+
+          (pagada
+            ? '<div class="compra-item-pend ok">✓ Pagada completa</div>'
+            : '<div class="compra-item-pend">Pendiente: '+cop(c.pendiente)+(c.pendiente<c.monto?' (pagado '+cop(c.monto-c.pendiente)+')':'')+'</div>')+
+          '</div>';
+      }).join('') : '<div style="color:var(--t3);font-size:13px;padding:12px 0">Sin compras registradas</div>')+
+
+      // HISTORIAL DE PAGOS
+      '<div class="lbl">Historial de pagos ('+pagos.length+')</div>'+
+      (pagos.length ? pagos.map(function(m){
         return '<div class="pago-item">'+
           '<div>'+
-            '<div class="pago-item-desc">'+(m.desc||(esFac?'Factura':'Pago'))+'</div>'+
+            '<div class="pago-item-desc">'+m.desc+'</div>'+
             '<div class="pago-item-meta">'+
-              '<span class="badge '+(esFac?'badge-red':'badge-green')+'">'+(esFac?'Factura':'Pago')+'</span>'+
-              (!esFac && m.origen?'<span class="badge '+(m.origen==='caja'?'badge-accent':'badge-blue')+'">'+(m.origen==='caja'?'Caja':'Fondo')+'</span>':'')+
+              '<span class="badge '+(m.origen==='caja'?'badge-accent':'badge-blue')+'">'+(m.origen==='caja'?'Caja':'Fondo')+'</span>'+
               '<span class="pago-item-fecha">'+fechaCorta(m.fecha)+'</span>'+
             '</div>'+
           '</div>'+
-          '<div class="pago-item-val" style="color:'+(esFac?'var(--red)':'var(--green)')+'">'+(esFac?'+':'-')+cop(m.valor)+'</div>'+
+          '<div class="pago-item-val" style="color:var(--green)">-'+cop(m.valor)+'</div>'+
           '</div>';
-      }).join('') : '<div style="color:var(--t3);font-size:13px;padding:12px 0">Sin movimientos</div>')+
+      }).join('') : '<div style="color:var(--t3);font-size:13px;padding:12px 0">Sin pagos registrados</div>')+
     '</div>';
 
   setPagoOrigen(ui.pagoOrigen);

@@ -284,6 +284,7 @@ header {
 .prov-item-name { font-size: 14px; font-weight: 600; }
 .prov-item-cat { font-size: 11px; color: var(--t2); margin-top: 2px; }
 .prov-item-total { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--t2); }
+.prov-item-vencido { font-size: 10px; font-weight: 600; color: var(--red); margin-top: 2px; }
 
 .prov-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
 .prov-stat { background: var(--s2); border-radius: var(--r-sm); padding: 10px 12px; }
@@ -308,6 +309,20 @@ header {
 .pago-item-meta { display: flex; gap: 8px; align-items: center; margin-top: 3px; }
 .pago-item-fecha { font-size: 11px; color: var(--t2); }
 .pago-item-val { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; color: var(--red); }
+
+.compra-item { background: var(--s2); border-radius: var(--r-sm); padding: 11px 13px; border-left: 3px solid var(--border); }
+.compra-item.st-vencida   { border-left-color: var(--red); }
+.compra-item.st-parcial   { border-left-color: var(--accent); }
+.compra-item.st-pendiente { border-left-color: var(--blue); }
+.compra-item.st-pagada    { border-left-color: var(--green); opacity: 0.7; }
+.compra-item-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.compra-item-desc { font-size: 13px; font-weight: 600; }
+.compra-item-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+.compra-item-monto { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; }
+.compra-item-venc { font-size: 11px; color: var(--t2); }
+.compra-item-venc.vencida { color: var(--red); font-weight: 600; }
+.compra-item-pend { margin-top: 6px; font-size: 12px; font-weight: 600; color: var(--accent); }
+.compra-item-pend.ok { color: var(--green); font-weight: 500; }
 
 /* ════════════════════════════════════════
    MÓDULO CAJA
