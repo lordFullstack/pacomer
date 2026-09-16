@@ -329,15 +329,13 @@
   <div class="qs-body">
     <div class="qs-label">Mesa</div>
     <div class="qs-mesas" id="qs-mesas" tabindex="-1"></div>
-    <div class="qs-label">Nombre / referencia</div>
-    <input class="qs-inp" id="qs-nombre" placeholder="Ej. Carlos" type="text" oninput="qsUpdateBoton()">
     <div class="qs-label">Valor</div>
     <input class="qs-inp qs-valor" id="qs-valor" placeholder="$0" type="text" inputmode="numeric" oninput="qsFmtValor(this)" onkeydown="qsValorKeydown(event)">
-    <div class="qs-label">Nota</div>
-    <input class="qs-inp" id="qs-nota" placeholder="Opcional" type="text" onkeydown="qsNotaKeydown(event)">
+    <div class="qs-label">Nota o nombre</div>
+    <input class="qs-inp" id="qs-nota" placeholder="Ej. Carlos, sin sal, para llevar..." type="text" onkeydown="qsNotaKeydown(event)">
+    <button class="qs-btn" id="qs-btn-registrar" onclick="qsRegistrar()" style="margin-top:6px">✓ REGISTRAR</button>
+    <div class="qs-limpiar" onclick="qsLimpiar()">Limpiar</div>
   </div>
-  <button class="qs-btn" id="qs-btn-registrar" onclick="qsRegistrar()">✓ REGISTRAR</button>
-  <div class="qs-limpiar" onclick="qsLimpiar()">Limpiar</div>
 </div>
 
 <div class="toast" id="toast"></div>

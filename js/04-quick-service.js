@@ -10,7 +10,6 @@ var qs = { mesaSel: null, registrando: false };
 function abrirQuickService() {
   qs.mesaSel = null;
   renderQsMesas();
-  document.getElementById('qs-nombre').value = '';
   document.getElementById('qs-valor').value = '';
   document.getElementById('qs-nota').value = '';
   qsUpdateBoton();
@@ -54,17 +53,16 @@ function qsUpdateBoton() {
   var btn = document.getElementById('qs-btn-registrar');
   if (qs.registrando) return;
   var valor = numFmt(document.getElementById('qs-valor').value);
-  var nombre = document.getElementById('qs-nombre').value.trim();
+  var nota = document.getElementById('qs-nota').value.trim();
   if (!qs.mesaSel || !valor) { btn.textContent = '✓ REGISTRAR'; return; }
-  btn.textContent = '✓ REGISTRAR '+cop(valor)+' · M'+(qs.mesaSel<10?'0'+qs.mesaSel:qs.mesaSel)+(nombre?' · '+nombre.toUpperCase():'');
+  btn.textContent = '✓ REGISTRAR '+cop(valor)+' · M'+(qs.mesaSel<10?'0'+qs.mesaSel:qs.mesaSel)+(nota?' · '+nota.toUpperCase():'');
 }
 
 function qsLimpiar() {
-  document.getElementById('qs-nombre').value = '';
   document.getElementById('qs-valor').value = '';
   document.getElementById('qs-nota').value = '';
   qsUpdateBoton();
-  document.getElementById('qs-nombre').focus();
+  document.getElementById('qs-valor').focus();
 }
 
 function qsRegistrar() {
@@ -80,8 +78,7 @@ function qsRegistrar() {
     document.getElementById('qs-valor').focus();
     return;
   }
-  var nombreInp = document.getElementById('qs-nombre').value.trim();
-  var nota = document.getElementById('qs-nota').value.trim();
+  var notaONombre = document.getElementById('qs-nota').value.trim();
   var mesaSel = qs.mesaSel;
 
   var tableId = db.tablesByLabel && db.tablesByLabel[String(mesaSel)];
@@ -93,15 +90,14 @@ function qsRegistrar() {
   btn.textContent = 'REGISTRANDO...';
 
   var existentes = (db.mesas[mesaSel] && db.mesas[mesaSel].personas) ? db.mesas[mesaSel].personas.length : 0;
-  var nombreFinal = nombreInp || ('Consumo '+(existentes+1));
+  var nombreFinal = notaONombre || ('Consumo '+(existentes+1));
 
-  agregarConsumoMesaConCola(tableId, mesaSel, valor, nombreFinal, nota||null).then(function(r){
+  agregarConsumoMesaConCola(tableId, mesaSel, valor, nombreFinal, notaONombre||null).then(function(r){
     qs.registrando = false;
     btn.disabled = false;
     if (!r.ok) { toast('Error: '+r.error,'err'); qsUpdateBoton(); return; }
     if (r.offline) {
       toast('Sin conexión — Mesa '+(mesaSel<10?'0'+mesaSel:mesaSel)+' · '+nombreFinal+' guardado, se sincronizará');
-      document.getElementById('qs-nombre').value = '';
       document.getElementById('qs-valor').value = '';
       document.getElementById('qs-nota').value = '';
       qsUpdateBoton();
@@ -110,7 +106,6 @@ function qsRegistrar() {
     toast('✓ Mesa '+(mesaSel<10?'0'+mesaSel:mesaSel)+' · '+nombreFinal+' · '+cop(valor)+' registrado');
     cargarMesas().then(function(){
       renderTodo();
-      document.getElementById('qs-nombre').value = '';
       document.getElementById('qs-valor').value = '';
       document.getElementById('qs-nota').value = '';
       qsUpdateBoton();
