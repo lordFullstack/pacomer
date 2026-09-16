@@ -29,6 +29,7 @@ var ui = {
   provSel: null,
   editCliId: null,
   editProvId: null,
+  compraRapidaPid: null,
   cajaTab: 'apertura',
   gastoOrigen: 'caja',
   pagoOrigen: 'caja'

@@ -305,6 +305,21 @@
   </div>
 </div>
 
+<!-- ══ MODAL COMPRA RÁPIDA (PROVEEDOR) ══ -->
+<div class="overlay" id="ov-compra-rapida">
+  <div class="modal modal-sm">
+    <div class="modal-head"><div class="modal-title">📦 Registrar compra</div><div class="modal-sub" id="cr-prov-nombre"></div></div>
+    <div class="modal-body">
+      <div class="field"><div class="lbl">Valor</div><input class="inp pago-val-inp" style="text-align:left" id="cr-val" placeholder="$0" type="text" inputmode="numeric" oninput="fmtInpG(this)"></div>
+      <div class="field"><div class="lbl">Descripción <span style="color:var(--t3);font-weight:400;text-transform:none">(opcional)</span></div><input class="inp" id="cr-desc" placeholder="Ej: pedido frutas martes" type="text"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-full" style="background:var(--red);color:#fff" onclick="registrarCompraRapida()">Registrar</button>
+      <button class="btn btn-ghost btn-full" style="font-size:13px" onclick="closeOverlay('ov-compra-rapida')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ TICKET (papel rasgado) ══ -->
 <!-- El CSS de .ticket-* ya existia en el archivo; faltaba este contenedor -->
 <div class="ticket-overlay" id="ov-ticket">

@@ -92,9 +92,12 @@ function renderProvList() {
     var vencido = p.saldoVencido||0;
     return '<div class="prov-item'+(ui.provSel===p.id?' sel':'')+'" onclick="selProv(\''+p.id+'\')">'+
       '<div><div class="prov-item-name">'+p.nombre+'</div><div class="prov-item-cat">'+(p.categoria||'')+'</div></div>'+
-      '<div style="text-align:right">'+
-        '<div class="prov-item-total" style="color:'+(saldo>0?'var(--red)':saldo<0?'var(--green)':'var(--t3)')+'">'+(saldo>0?cop(saldo):saldo<0?'A favor '+cop(-saldo):'✓')+'</div>'+
-        (vencido>0?'<div class="prov-item-vencido">Vencido '+cop(vencido)+'</div>':'')+
+      '<div style="display:flex;align-items:center;gap:10px">'+
+        '<button class="btn-compra-rapida" onclick="event.stopPropagation();abrirCompraRapida(\''+p.id+'\')">+ Compra</button>'+
+        '<div style="text-align:right">'+
+          '<div class="prov-item-total" style="color:'+(saldo>0?'var(--red)':saldo<0?'var(--green)':'var(--t3)')+'">'+(saldo>0?cop(saldo):saldo<0?'A favor '+cop(-saldo):'✓')+'</div>'+
+          (vencido>0?'<div class="prov-item-vencido">Vencido '+cop(vencido)+'</div>':'')+
+        '</div>'+
       '</div>'+
       '</div>';
   }).join('');
@@ -225,20 +228,50 @@ function setPagoOrigen(o) {
   f.className='origen-btn'+(o==='fondo'?' active-fondo':'');
 }
 
+function _crearCompraProveedor(pid, val, desc) {
+  var hoy = new Date().toISOString().slice(0,10);
+  return sb.rpc('registrar_compra', {
+    p_supplier_id: pid, p_amount: val, p_order_date: hoy, p_invoice_date: null,
+    p_invoice_number: desc || null, p_due_date: null, p_idempotency_key: uid()
+  });
+}
+
 function registrarFactura(pid) {
   var p = db.proveedores.find(function(x){return x.id===pid;});
   if (!p) return;
   var val = numFmt(document.getElementById('fac-val').value);
   if (!val) { toast('Ingresa el valor de la factura','err'); return; }
   var desc = document.getElementById('fac-desc').value.trim();
-  var hoy = new Date().toISOString().slice(0,10);
-  sb.rpc('registrar_compra', {
-    p_supplier_id: pid, p_amount: val, p_order_date: hoy, p_invoice_date: null,
-    p_invoice_number: desc || null, p_due_date: null, p_idempotency_key: uid()
-  }).then(function(r){
+  _crearCompraProveedor(pid, val, desc).then(function(r){
     if (r.error) { toast('Error: '+r.error.message, 'err'); return; }
     toast(p.nombre+' — factura '+cop(val)+' registrada','err');
     cargarProveedores(); cargarMovimientosProveedor(pid);
+  });
+}
+
+function abrirCompraRapida(pid) {
+  var p = db.proveedores.find(function(x){return x.id===pid;});
+  if (!p) return;
+  ui.compraRapidaPid = pid;
+  document.getElementById('cr-prov-nombre').textContent = p.nombre;
+  document.getElementById('cr-val').value = '';
+  document.getElementById('cr-desc').value = '';
+  openOverlay('ov-compra-rapida');
+}
+
+function registrarCompraRapida() {
+  var pid = ui.compraRapidaPid;
+  var p = db.proveedores.find(function(x){return x.id===pid;});
+  if (!p) return;
+  var val = numFmt(document.getElementById('cr-val').value);
+  if (!val) { toast('Ingresa el valor de la compra','err'); return; }
+  var desc = document.getElementById('cr-desc').value.trim();
+  _crearCompraProveedor(pid, val, desc).then(function(r){
+    if (r.error) { toast('Error: '+r.error.message, 'err'); return; }
+    toast(p.nombre+' — compra '+cop(val)+' registrada','err');
+    closeOverlay('ov-compra-rapida');
+    cargarProveedores();
+    if (ui.provSel===pid) cargarMovimientosProveedor(pid);
   });
 }
 
