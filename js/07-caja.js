@@ -79,6 +79,7 @@ function renderCajaDia() {
   var ventas=sumTipo('SALE'), abonos=sumTipo('ABONO'), gastos=-sumTipo('GASTO'), pagosProv=-sumTipo('SUPPLIER_PAYMENT');
   var gastosItems = movs.filter(function(m){return m.type==='GASTO';});
   el.innerHTML =
+    '<div class="page-wrap">'+
     '<div class="dia-hero">'+
       '<div class="dia-hero-item"><div class="dia-hero-val" style="color:var(--green)">'+cop(c.ingresos)+'</div><div class="dia-hero-label">Ingresos</div></div>'+
       '<div class="dia-hero-item"><div class="dia-hero-val" style="color:var(--red)">'+cop(Math.abs(c.egresos))+'</div><div class="dia-hero-label">Egresos</div></div>'+
@@ -112,6 +113,7 @@ function renderCajaDia() {
             '<div class="gasto-item-val">'+cop(Math.abs(g.amount))+'</div></div>';
         }).join('') : '')+
       '</div>'+
+    '</div>'+
     '</div>';
 }
 
@@ -137,7 +139,7 @@ function renderCajaCierre() {
 
   if (c.status === 'CLOSED') {
     var diff = Number(c.difference);
-    el.innerHTML = '<div class="cierre-wrap">'+
+    el.innerHTML = '<div class="page-wrap">'+
       '<div class="cerrado-banner"><div class="cerrado-icon">✅</div>'+
         '<div class="cerrado-title">Caja cerrada</div>'+
         '<div class="cerrado-sub">'+new Date(c.closed_at).toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'})+'</div>'+
@@ -152,7 +154,7 @@ function renderCajaCierre() {
       histCierres+
     '</div>';
   } else if (c.status === 'COUNTING') {
-    el.innerHTML = '<div class="cierre-wrap">'+
+    el.innerHTML = '<div class="page-wrap">'+
       '<div class="cierre-resumen">'+
         '<div class="cr-row"><span class="cr-label">Base apertura</span><span class="cr-val">'+cop(c.opening_cash)+'</span></div>'+
         '<div class="cr-row"><span class="cr-label">+ Ingresos</span><span class="cr-val" style="color:var(--green)">'+cop(c.ingresos)+'</span></div>'+
@@ -174,7 +176,7 @@ function renderCajaCierre() {
       histCierres+
     '</div>';
   } else {
-    el.innerHTML = '<div class="cierre-wrap">'+
+    el.innerHTML = '<div class="page-wrap">'+
       '<div class="esperado-box">'+
         '<div class="esperado-label">Efectivo esperado en caja</div>'+
         '<div class="esperado-val">'+cop(c.esperado_actual)+'</div>'+

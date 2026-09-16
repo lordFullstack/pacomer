@@ -34,25 +34,26 @@ function renderConfig() {
   var c = db.config;
   var el = document.getElementById('config-content');
   el.innerHTML =
-    '<div class="card" style="margin-bottom:16px">'+
+    '<div class="page-wrap">'+
+    '<div class="card">'+
       '<div class="card-title">🏪 Datos del negocio</div>'+
-      '<div onclick="document.getElementById(\'cfg-logo-inp\').click()" style="width:84px;height:84px;border-radius:16px;cursor:pointer;background:'+(c.logo_url?'url('+c.logo_url+') center/cover no-repeat':'var(--s1)')+';border:1.5px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px" id="cfg-logo-preview">'+(c.logo_url?'':'📷')+'</div>'+
-      '<input type="file" id="cfg-logo-inp" accept="image/*" style="display:none" onchange="subirLogoNegocio(this)">'+
-      '<div class="lbl">Nombre del negocio</div>'+
-      '<input class="apertura-inp" style="width:100%;margin-bottom:10px" id="cfg-nombre" value="'+(c.nombre_negocio||'')+'" placeholder="Ej: Pa\' Comer">'+
-      '<div class="lbl">Cédula / NIT</div>'+
-      '<input class="apertura-inp" style="width:100%;margin-bottom:10px" id="cfg-cedula" value="'+(c.cedula||'')+'" placeholder="Ej: 1072523641">'+
-      '<div class="lbl">Ciudad / Municipio</div>'+
-      '<input class="apertura-inp" style="width:100%;margin-bottom:10px" id="cfg-ciudad" value="'+(c.ciudad||'')+'" placeholder="Ej: Montelíbano">'+
-      '<div class="lbl">Departamento</div>'+
-      '<input class="apertura-inp" style="width:100%;margin-bottom:10px" id="cfg-departamento" value="'+(c.departamento||'')+'" placeholder="Ej: Córdoba">'+
-      '<div class="lbl">Tipo de servicio</div>'+
-      '<input class="apertura-inp" style="width:100%;margin-bottom:10px" id="cfg-servicio" value="'+(c.servicio||'Servicio de comedor')+'" placeholder="Ej: Servicio de comedor">'+
-      '<div class="lbl">Dirección</div>'+
-      '<input class="apertura-inp" style="width:100%;margin-bottom:14px" id="cfg-direccion" value="'+(c.direccion||'')+'" placeholder="Ej: Cra 5 # 10-20, Montelíbano">'+
-      '<button class="btn btn-accent btn-full" onclick="guardarNegocio()">Guardar datos del negocio</button>'+
+      '<div style="display:flex;flex-direction:column;gap:12px">'+
+        '<div onclick="document.getElementById(\'cfg-logo-inp\').click()" style="width:72px;height:72px;border-radius:14px;cursor:pointer;background:'+(c.logo_url?'url('+c.logo_url+') center/cover no-repeat':'var(--s2)')+';border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px" id="cfg-logo-preview">'+(c.logo_url?'':'📷')+'</div>'+
+        '<input type="file" id="cfg-logo-inp" accept="image/*" style="display:none" onchange="subirLogoNegocio(this)">'+
+        '<div class="field"><div class="lbl">Nombre del negocio</div><input class="inp" id="cfg-nombre" value="'+(c.nombre_negocio||'')+'" placeholder="Ej: Pa\' Comer"></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
+          '<div class="field"><div class="lbl">Cédula / NIT</div><input class="inp" id="cfg-cedula" value="'+(c.cedula||'')+'" placeholder="Ej: 1072523641"></div>'+
+          '<div class="field"><div class="lbl">Ciudad / Municipio</div><input class="inp" id="cfg-ciudad" value="'+(c.ciudad||'')+'" placeholder="Ej: Montelíbano"></div>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
+          '<div class="field"><div class="lbl">Departamento</div><input class="inp" id="cfg-departamento" value="'+(c.departamento||'')+'" placeholder="Ej: Córdoba"></div>'+
+          '<div class="field"><div class="lbl">Tipo de servicio</div><input class="inp" id="cfg-servicio" value="'+(c.servicio||'Servicio de comedor')+'" placeholder="Ej: Servicio de comedor"></div>'+
+        '</div>'+
+        '<div class="field"><div class="lbl">Dirección</div><input class="inp" id="cfg-direccion" value="'+(c.direccion||'')+'" placeholder="Ej: Cra 5 # 10-20, Montelíbano"></div>'+
+        '<button class="btn btn-accent btn-full" onclick="guardarNegocio()">Guardar datos del negocio</button>'+
+      '</div>'+
     '</div>'+
-    '<div class="card" style="margin-bottom:16px">'+
+    '<div class="card">'+
       '<div class="card-title">👤 Usuarios y PIN de acceso</div>'+
       '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px" id="cfg-usuarios-list"></div>'+
       '<button class="btn btn-ghost btn-full" onclick="abrirModalUsuario()">+ Agregar usuario</button>'+
@@ -63,6 +64,7 @@ function renderConfig() {
       '<input type="file" id="restore-inp" accept="application/json" style="display:none" onchange="seleccionarArchivoRespaldo(this)">'+
       '<button class="btn btn-ghost btn-full" onclick="document.getElementById(\'restore-inp\').click()">Elegir archivo de respaldo…</button>'+
       '<div id="restore-preview"></div>'+
+    '</div>'+
     '</div>';
   renderUsuariosList();
 }

@@ -234,7 +234,7 @@ function renderMovimientos() {
   var egTotal   = items.filter(function(i){return i.tipo==='egreso';}).reduce(function(s,i){return s+i.valor;},0);
 
   el.innerHTML =
-    '<div style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px">'+
+    '<div class="page-wrap">'+
 
     // Resumen rápido
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'+
@@ -248,7 +248,7 @@ function renderMovimientos() {
       items.map(function(item){
         var colorVal = item.tipo==='ingreso'?'var(--green)':'var(--red)';
         var signo    = item.tipo==='ingreso'?'+':'-';
-        return '<div class="pago-item" style="background:var(--s1);border:1.5px solid var(--border);border-radius:var(--r-sm)">'+
+        return '<div class="pago-item" style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r-sm)">'+
           '<div>'+
             '<div class="pago-item-desc">'+item.label+'</div>'+
             '<div class="pago-item-meta">'+
@@ -263,7 +263,7 @@ function renderMovimientos() {
     )+
 
     // Respaldo
-    '<div style="background:var(--s1);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px">'+
+    '<div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px">'+
       '<div class="lbl" style="margin:0">Respaldo de datos</div>'+
       '<div style="font-size:12px;color:var(--t2)">Exporta todos los datos operativos reales del negocio (sin credenciales). Restaurar clientes/proveedores/config está en Configuración.</div>'+
       '<button class="btn btn-accent" onclick="exportarRespaldo(false)">Exportar respaldo</button>'+
