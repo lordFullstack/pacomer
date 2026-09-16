@@ -415,6 +415,11 @@ header {
 .toast.err { border-color: var(--red); }
 .toast.inf { border-color: var(--blue); }
 
+/* ACTUALIZACIÓN PWA */
+.sw-update-banner { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--s1); border: 1px solid var(--accent); border-radius: 10px; padding: 10px 10px 10px 16px; display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--t1); box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 450; }
+.sw-update-banner button { background: var(--accent); color: #000; border: none; border-radius: var(--r-sm); padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.sw-update-banner button:hover { background: var(--a-hover); }
+
 /* SPLASH */
 .splash-screen { position: fixed; inset: 0; z-index: 1000; background: var(--bg,#111); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; transition: opacity 0.4s; }
 .splash-screen.hide { opacity: 0; pointer-events: none; }
