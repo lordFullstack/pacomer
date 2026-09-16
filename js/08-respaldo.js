@@ -212,12 +212,18 @@ function renderMovimientos() {
   var el = document.getElementById('cview-movimientos');
   var movs = db.cajaMovimientos||[];
   var labelPorTipo = {SALE:'Venta', ABONO:'Abono crédito', SUPPLIER_PAYMENT:'Pago a proveedor', ADJUSTMENT:'Ajuste', REVERSAL:'Reversión'};
+  var labelPorCanal = {mesa:'Mesa', llevar:'Para llevar', domicilio:'Domicilio'};
+  function labelVenta(m) {
+    if (!m.canal) return 'Venta';
+    if (m.canal==='mesa') return 'Venta — '+(m.mesa_label?('Mesa '+m.mesa_label):'Mesa');
+    return 'Venta — '+(labelPorCanal[m.canal]||m.canal);
+  }
   var items = movs.map(function(m){
     var esIngreso = Number(m.amount) >= 0;
     return {
       ts: new Date(m.created_at).getTime(),
       tipo: esIngreso?'ingreso':'egreso',
-      label: m.type==='GASTO' ? (m.description||'Gasto') : (labelPorTipo[m.type]||m.type),
+      label: m.type==='GASTO' ? (m.description||'Gasto') : m.type==='SALE' ? labelVenta(m) : (labelPorTipo[m.type]||m.type),
       valor: Math.abs(Number(m.amount)),
       badge: esIngreso?'badge-green':'badge-red',
       badgeLabel: esIngreso?'Ingreso':'Egreso'

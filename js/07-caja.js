@@ -29,7 +29,7 @@ function cargarCajaActual() {
 
 function cargarMovimientosCaja() {
   if (!db.cajaActual) { db.cajaMovimientos = []; return Promise.resolve(); }
-  return sb.from('cash_movements').select('type,amount,description,created_at').eq('cash_session_id', db.cajaActual.cash_session_id).order('created_at').then(function(r){
+  return sb.from('cash_movement_detail').select('type,amount,description,created_at,canal,mesa_label').eq('cash_session_id', db.cajaActual.cash_session_id).order('created_at').then(function(r){
     if (r.error) { sbErr(r.error,'cargar movimientos de caja'); return; }
     db.cajaMovimientos = r.data||[];
   });
