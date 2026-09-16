@@ -21,6 +21,12 @@ load().then(function(){
       if (!ui.usuarioActual) return;
       cargarMesas().then(renderTodo);
       cargarOrdenesRecientes().then(renderStats);
+      // Mismo problema que Mesas: si la caja se abre/cierra desde otro
+      // dispositivo, este no se enteraba hasta reiniciar sesion o entrar
+      // a la pestaña de Caja. No repinta nada por si solo (evita borrar
+      // un arqueo a medio escribir), solo mantiene db.cajaActual al dia
+      // para los chequeos de "abre la caja antes de..." en Mesas.
+      cargarCajaActual();
     }, 15000);
     cargarPantallaLogin();
     actualizarBadgeSync();

@@ -70,6 +70,7 @@ function pinPress(n) {
           cargarProveedores();
           cargarConfigNegocio();
           cargarUsuarios();
+          cargarCajaActual();
           cargarMesas().then(renderTodo);
           cargarOrdenesRecientes().then(renderStats);
         });
