@@ -13,7 +13,15 @@ load().then(function(){
     document.getElementById('splash').classList.add('hide');
     setTipo('mesa');
     renderTodo();
-    setInterval(function(){ renderGrid(); renderStats(); }, 60000);
+    // Antes solo volvia a dibujar con los datos que ya estaban en memoria
+    // (nunca los volvia a pedir al servidor), asi que un cambio hecho desde
+    // otro dispositivo (celular <-> escritorio) nunca aparecia hasta
+    // reiniciar sesion. Ahora si vuelve a consultar Mesas cada 15s.
+    setInterval(function(){
+      if (!ui.usuarioActual) return;
+      cargarMesas().then(renderTodo);
+      cargarOrdenesRecientes().then(renderStats);
+    }, 15000);
     cargarPantallaLogin();
     actualizarBadgeSync();
     sincronizarCola();

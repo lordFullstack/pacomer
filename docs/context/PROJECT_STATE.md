@@ -2,6 +2,9 @@
 
 _Actualizado: Integración front-end completa + LOOP 08A + Reestructuración de archivos + LOOP 09 + LOOP 10 + LOOP 11 + LOOP 12 + Dashboard — 2026-09-15_
 
+## Fix: Mesas no se sincronizaba entre dispositivos (COMPLETO)
+El usuario reportó que móvil y escritorio no se sincronizaban a menos que reiniciara sesión. Causa real: el `setInterval` de `js/16-init.js` solo volvía a **dibujar** con los datos que ya estaban en memoria (`renderGrid()`/`renderStats()`), nunca volvía a pedirlos al servidor — así que un cambio hecho desde otro dispositivo nunca llegaba hasta un re-login completo. Ahora el intervalo (cada 15s, solo si hay sesión activa) vuelve a llamar `cargarMesas()`/`cargarOrdenesRecientes()` de verdad. Probado con dos pestañas logueadas simultáneamente: un registro hecho en una apareció en la otra en ~18s sin recargar ni reiniciar sesión.
+
 ## Dashboard gerencial (COMPLETO)
 Pedido directo del usuario tras revisar la app: pantalla con visión general del negocio. Cierra un hueco señalado desde el Loop 08 — `dashboard_resumen` (la RPC) existía pero nunca se construyó una página para mostrarla. Se agregó `flujo` (ingresos/gastos/saldo, no existía) y períodos `mes`/`año` (antes solo hoy/7d/30d) a la RPC, más la pantalla `#page-dashboard` (admin-only, mismo patrón de protección que Caja/Auditoría). Probado con datos reales: matemática de ingresos/egresos/saldo verificada. Ver `docs/context/HANDOFF_DASHBOARD.md`.
 
