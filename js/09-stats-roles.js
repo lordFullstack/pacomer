@@ -3,7 +3,7 @@
 // ════════════════════════════════════════════════════════
 function renderStats() {
   var ocu = Object.keys(db.mesas).length;
-  var hoyTotal = (db.cajaActual && db.cajaActual.ingresos) ? Number(db.cajaActual.ingresos) : 0;
+  var hoyTotal = Number(db.ventasHoy) || 0;
   document.getElementById('h-ocupadas').textContent = ocu;
   document.getElementById('h-hoy').textContent = cop(hoyTotal);
   document.getElementById('ss-mesas').textContent = ocu;

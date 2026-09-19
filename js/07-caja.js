@@ -15,14 +15,25 @@ function setCajaTab(tab) {
   if (tab==='movimientos') renderMovimientos();
 }
 
+// "Hoy" (header) se calcula aparte, por fecha de calendario — no por la
+// sesion de caja abierta. Si la caja no se cierra a diario (se abrio ayer,
+// o hace dias, y sigue abierta) db.cajaActual.ingresos acumula ventas de
+// varios dias; eso es correcto para Caja (esperado_actual/arqueo depende de
+// la sesion real), pero "Hoy" en el header debe resetear en la medianoche
+// sin importar cuándo se cerró caja por última vez.
 function cargarCajaActual() {
+  var inicioHoy = new Date(); inicioHoy.setHours(0,0,0,0);
+  var inicioManana = new Date(inicioHoy.getTime() + 86400000);
   return Promise.all([
     sb.from('cash_session_detail').select('*').order('opened_at',{ascending:false}).limit(1),
-    sb.from('cash_sessions').select('id,opening_cash,expected_cash,counted_cash,difference,closed_at').eq('status','CLOSED').order('closed_at',{ascending:false}).limit(7)
+    sb.from('cash_sessions').select('id,opening_cash,expected_cash,counted_cash,difference,closed_at').eq('status','CLOSED').order('closed_at',{ascending:false}).limit(7),
+    sb.from('cash_movements').select('amount').gt('amount',0).gte('created_at',inicioHoy.toISOString()).lt('created_at',inicioManana.toISOString())
   ]).then(function(r){
     if (r[0].error) { sbErr(r[0].error,'cargar caja'); }
     db.cajaActual = (r[0].data && r[0].data[0]) || null;
     db.historialCierres = r[1].data || [];
+    if (r[2].error) { sbErr(r[2].error,'cargar ventas de hoy'); db.ventasHoy = 0; }
+    else { db.ventasHoy = (r[2].data||[]).reduce(function(s,m){return s+Number(m.amount);},0); }
     return cargarMovimientosCaja();
   });
 }
