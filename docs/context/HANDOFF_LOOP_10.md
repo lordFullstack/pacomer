@@ -56,3 +56,44 @@ Contra el backend real, sirviendo la app por HTTP local (`localhost`, donde el S
 
 ## Siguiente paso
 LOOP 11 — Auditoría y seguridad (UI de consulta del `audit_events` ya existente + RPC de anulación de pagos, que hoy no existe).
+
+## Actualización 2026-09-19 — se amplió el alcance offline
+
+Motivo: un corte real de internet dejó las cards de Mesas sin mostrar
+cuánto debía cada mesa (aunque el registro sí había quedado guardado en la
+cola), y el usuario pidió explícitamente poder seguir cobrando en efectivo
+durante el corte, no solo registrar. Dos cambios sobre el diseño original:
+
+1. **Las cards ahora reflejan lo que sigue en la cola offline**, no solo lo
+   que ya confirmó el servidor. `aplicarPendientesOffline()`
+   (`js/13-offline-sync.js`) fusiona en `db.mesas` los consumos y cobros
+   pendientes cada vez que se llama `cargarMesas()`, y también justo
+   después de encolar algo nuevo — así la mesa deja de verse "Libre" o con
+   el total viejo mientras no hay señal.
+2. **Cobrar (individual y mesa completa) ahora también se encola sin
+   conexión** — contradice el punto anterior de este documento ("ninguna
+   operación que mueva dinero se pone en cola"). La razón del cambio: el
+   dinero en efectivo ya lo recibe el cajero en el momento, sin importar si
+   el POS tiene señal o no; lo único que se difiere es la confirmación
+   contable en el servidor. Abrir/cerrar caja, gastos, abonos de clientes y
+   pagos a proveedores siguen sin encolarse — esas sí requieren ver el
+   estado real del servidor antes de decidir, no solo confirmar algo que ya
+   pasó físicamente.
+
+Salvaguardas que se mantuvieron para no perder la disciplina original:
+- Un cobro sobre un consumo que todavía no tiene `diner_id` real (su propio
+  registro sigue en la cola) no se encola como operación aparte — se marca
+  sobre la MISMA operación pendiente (`cobrarAlSincronizar`) para que, al
+  crearse el comensal en el servidor, se cobre en el mismo golpe. Evita
+  inventar un id que no existe.
+- "Fiar" y "corregir valor" siguen bloqueados sobre filas sin sincronizar
+  (necesitan un `obligation_id` real) — el alcance ampliado es solo
+  registrar y cobrar en efectivo.
+- "Liberar sin cobrar" sigue exigiendo que la mesa esté sincronizada, por
+  ser una acción que condona saldo pendiente.
+- Se encontró y corrigió una condición de carrera real durante las pruebas:
+  el sync automático (cada 30s) podía pisar con una copia vieja del objeto
+  una marca de "cobrar al sincronizar" hecha en paralelo por el cajero. Se
+  corrigió con lecturas/escrituras atómicas sobre IndexedDB
+  (`offlineMutar()`) en vez de leer-modificar-escribir con una copia en
+  memoria potencialmente desactualizada.

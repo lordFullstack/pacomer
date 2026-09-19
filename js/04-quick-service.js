@@ -101,6 +101,7 @@ function qsRegistrar() {
       document.getElementById('qs-valor').value = '';
       document.getElementById('qs-nota').value = '';
       qsUpdateBoton();
+      aplicarPendientesOffline().then(renderTodo);
       return;
     }
     toast('✓ Mesa '+(mesaSel<10?'0'+mesaSel:mesaSel)+' · '+nombreFinal+' · '+cop(valor)+' registrado');

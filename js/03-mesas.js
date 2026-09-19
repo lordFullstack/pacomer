@@ -11,6 +11,14 @@ function pendienteMesa(n) {
 // db.mesas[n] = {personas:[{id(=diner_id), obligationId, valor, nota, hora, pagada, fiada, clienteId}], tableSessionId}
 // Se mantiene la misma forma que el modelo legacy para no tocar renderGrid/renderMesaModal/etc.
 function cargarMesas() {
+  return cargarMesasDesdeServidor().then(aplicarPendientesOffline);
+}
+
+// Trae el estado real de Mesas desde el servidor. db.mesas se completa
+// despues con lo que siga pendiente en la cola offline (aplicarPendientesOffline,
+// js/13-offline-sync.js) para que la card muestre el valor a cobrar aunque
+// todavia no haya sincronizado.
+function cargarMesasDesdeServidor() {
   return sb.from('tables').select('id,label').then(function(rt){
     if (rt.error) { sbErr(rt.error,'cargar mesas'); return; }
     db.tablesByLabel = {}; db.tableIdToLabel = {};
@@ -179,6 +187,7 @@ function registrar() {
       if (r.offline) {
         toast('Sin conexión — Mesa '+mesaNumReg+' guardada, se sincronizará automáticamente');
         limpiarReg();
+        aplicarPendientesOffline().then(renderTodo);
         return;
       }
       toast('Mesa '+mesaNumReg+' — '+cop(valorReg)+' registrado');
@@ -240,7 +249,16 @@ function renderMesaModal() {
     var resuelta = p.pagada||p.fiada;
     div.className = 'p-row'+(p.fiada?' fiada':p.pagada?' resuelta':'');
     var badge = '';
-    if (p.fiada) {
+    if (p.offline && p.pagada) {
+      badge = '<span class="badge badge-green" title="Cobrado en este dispositivo, falta sincronizar con el servidor">✓ Pagó (sin sincronizar)</span>';
+    } else if (p.offline) {
+      badge = '<div class="p-actions">'+
+        '<button class="btn-cob-p" onclick="cobrarPersona(\''+p.id+'\')">Cobrar</button>'+
+        '<span class="badge" title="Guardado en este dispositivo, falta sincronizar con el servidor — solo se puede cobrar hasta que sincronice" style="margin-left:6px">🔄 Sin sincronizar</span>'+
+        '</div>';
+    } else if (p.offlinePago) {
+      badge = '<span class="badge badge-green" title="Cobrado en este dispositivo, falta sincronizar con el servidor">✓ Pagó (sin sincronizar)</span>';
+    } else if (p.fiada) {
       var cli = db.clientes.find(function(c){return c.id===p.clienteId;});
       badge = '<span class="badge badge-blue">📋 '+(cli?cli.nombre:'Fiado')+'</span>';
     } else if (p.pagada) {
@@ -270,21 +288,33 @@ function cobrarPersona(pid) {
   var p = m.personas.find(function(x){return x.id===pid;});
   if (!p||p.pagada||p.fiada) return;
   if (!db.cajaActual || db.cajaActual.status==='CLOSED') { toast('Abre la caja antes de cobrar','err'); return; }
-  sb.rpc('cobrar_persona', { p_diner_id: pid, p_tenders: [{method:'efectivo', amount: p.valor}], p_idempotency_key: uid() }).then(function(r){
-    if (r.error) { toast('Error: '+r.error.message,'err'); return; }
+  cobrarPersonaConCola(p).then(function(r){
+    if (!r.ok) { toast('Error: '+r.error,'err'); return; }
+    var ticket = function(){
+      mostrarTicket({
+        mesa: mesaNum,
+        tipo: 'mesa',
+        personas: [{valor:p.valor, nota:p.nota, pagada:true}],
+        total: p.valor,
+        atendidoPor: db.usuarioActivo ? db.usuarioActivo.nombre : ''
+      });
+    };
+    if (r.offline) {
+      toast('Sin conexión — cobro guardado, se sincronizará automáticamente');
+      aplicarPendientesOffline().then(function(){
+        renderTodo();
+        if (ui.modalMesa===mesaNum) renderMesaModal();
+      });
+      ticket();
+      return;
+    }
     toast('Cobrado — '+cop(p.valor));
     cargarMesas().then(function(){
       renderTodo();
       if (ui.modalMesa===mesaNum) renderMesaModal();
     });
     cargarCajaActual();
-    mostrarTicket({
-      mesa: mesaNum,
-      tipo: 'mesa',
-      personas: [{valor:p.valor, nota:p.nota, pagada:true}],
-      total: p.valor,
-      atendidoPor: db.usuarioActivo ? db.usuarioActivo.nombre : ''
-    });
+    ticket();
   });
 }
 
@@ -322,24 +352,18 @@ function editarValorPersona(obligationId) {
 }
 
 function cobrarTodo() {
-  var m = db.mesas[ui.modalMesa];
-  if (!m) return;
-  var pend = pendienteMesa(ui.modalMesa);
   var mesaNum = ui.modalMesa;
+  var m = db.mesas[mesaNum];
+  if (!m) return;
+  var pend = pendienteMesa(mesaNum);
   var sessionId = m.tableSessionId;
   var personasParaTicket = m.personas;
   if (pend>0 && (!db.cajaActual || db.cajaActual.status==='CLOSED')) { toast('Abre la caja antes de cobrar','err'); return; }
-  var cobroPromise = pend>0
-    ? sb.rpc('cobrar_mesa', { p_table_session_id: sessionId, p_tenders: [{method:'efectivo', amount: pend}], p_idempotency_key: uid() })
-    : Promise.resolve({error:null});
-  cobroPromise.then(function(r){
-    if (r.error) { toast('Error: '+r.error.message,'err'); return; }
-    sb.rpc('liberar_orden', { p_table_session_id: sessionId, p_confirmar_con_pendiente: false, p_idempotency_key: uid() }).then(function(r2){
-      if (r2.error) { toast('Error: '+r2.error.message,'err'); return; }
-      toast('Mesa '+mesaNum+' cobrada — '+cop(pend));
-      closeOverlay('ov-mesa');
-      cargarMesas().then(renderTodo);
-      cargarCajaActual();
+  var tableId = db.tablesByLabel[String(mesaNum)];
+  if (!tableId) { toast('Mesa no configurada en el sistema','err'); return; }
+  cobrarMesaConCola(tableId, mesaNum, sessionId, pend).then(function(r){
+    if (!r.ok) { toast('Error: '+r.error,'err'); return; }
+    var ticket = function(){
       mostrarTicket({
         mesa: mesaNum,
         tipo: 'mesa',
@@ -347,7 +371,19 @@ function cobrarTodo() {
         total: pend,
         atendidoPor: db.usuarioActivo ? db.usuarioActivo.nombre : ''
       });
-    });
+    };
+    if (r.offline) {
+      toast('Sin conexión — Mesa '+mesaNum+' cobrada, se sincronizará automáticamente');
+      closeOverlay('ov-mesa');
+      aplicarPendientesOffline().then(renderTodo);
+      ticket();
+      return;
+    }
+    toast('Mesa '+mesaNum+' cobrada — '+cop(pend));
+    closeOverlay('ov-mesa');
+    cargarMesas().then(renderTodo);
+    cargarCajaActual();
+    ticket();
   });
 }
 
@@ -355,6 +391,7 @@ function liberarMesa() {
   var mesaNum = ui.modalMesa;
   var m = db.mesas[mesaNum];
   if (!m) return;
+  if (m.personas.some(function(p){return p.offline;})) { toast('Hay consumos sin sincronizar en esta mesa — espera a que recuperen conexión para liberarla','err'); return; }
   var sessionId = m.tableSessionId;
   sb.rpc('liberar_orden', { p_table_session_id: sessionId, p_confirmar_con_pendiente: true, p_idempotency_key: uid() }).then(function(r){
     if (r.error) { toast('Error: '+r.error.message,'err'); return; }
@@ -371,8 +408,15 @@ function addPersona() {
   var mesaNum = ui.modalMesa;
   var m = db.mesas[mesaNum];
   if (!m) return;
-  sb.rpc('agregar_persona', { p_table_session_id: m.tableSessionId, p_nombre: null, p_descriptor: null, p_valor: val, p_nota: nota||null, p_idempotency_key: uid() }).then(function(r){
-    if (r.error) { toast('Error: '+r.error.message,'err'); return; }
+  var tableId = db.tablesByLabel[String(mesaNum)];
+  if (!tableId) { toast('Mesa no configurada en el sistema','err'); return; }
+  agregarConsumoMesaConCola(tableId, mesaNum, val, null, nota||null).then(function(r){
+    if (!r.ok) { toast('Error: '+r.error,'err'); return; }
+    if (r.offline) {
+      toast('Sin conexión — se guardó y sincronizará automáticamente');
+      aplicarPendientesOffline().then(function(){ renderTodo(); if (ui.modalMesa===mesaNum) renderMesaModal(); });
+      return;
+    }
     toast('Persona agregada — '+cop(val));
     cargarMesas().then(function(){ renderTodo(); if (ui.modalMesa===mesaNum) renderMesaModal(); });
   });
