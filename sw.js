@@ -6,12 +6,13 @@
 // IMPORTANTE: subir CACHE_NAME (p.ej. 'pacomer-shell-v3') cada vez que
 // cambie la lista de archivos de APP_SHELL, para que el navegador note
 // que este archivo cambio y dispare el ciclo de actualizacion.
-var CACHE_NAME = 'pacomer-shell-v2';
+var CACHE_NAME = 'pacomer-shell-v3';
 var APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
   './css/styles.css',
+  './js/vendor/supabase.js',
   './js/00-estado.js',
   './js/01-persistencia-legacy.js',
   './js/02-utils-navegacion.js',
