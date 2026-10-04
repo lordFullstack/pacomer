@@ -126,11 +126,11 @@
       </div>
       <div class="field">
         <div class="lbl">Valor</div>
-        <input class="inp inp-big" id="inp-val" placeholder="$0" type="text" inputmode="numeric" oninput="fmtVal(this)">
+        <input class="inp inp-big" id="inp-val" placeholder="$0" type="text" inputmode="numeric" oninput="fmtVal(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();registrar();}">
       </div>
       <div class="field">
         <div class="lbl">Nota <span style="color:var(--t3);font-weight:400;text-transform:none">(opcional)</span></div>
-        <textarea class="inp textarea" id="inp-nota" placeholder="Sin sal, apurado..."></textarea>
+        <textarea class="inp textarea" id="inp-nota" placeholder="Sin sal, apurado..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();registrar();}"></textarea>
       </div>
     </div>
     <div class="reg-foot">
@@ -310,8 +310,8 @@
   <div class="modal modal-sm">
     <div class="modal-head"><div class="modal-title">📦 Registrar compra</div><div class="modal-sub" id="cr-prov-nombre"></div></div>
     <div class="modal-body">
-      <div class="field"><div class="lbl">Valor</div><input class="inp pago-val-inp" style="text-align:left" id="cr-val" placeholder="$0" type="text" inputmode="numeric" oninput="fmtInpG(this)"></div>
-      <div class="field"><div class="lbl">Descripción <span style="color:var(--t3);font-weight:400;text-transform:none">(opcional)</span></div><input class="inp" id="cr-desc" placeholder="Ej: pedido frutas martes" type="text"></div>
+      <div class="field"><div class="lbl">Valor</div><input class="inp pago-val-inp" style="text-align:left" id="cr-val" placeholder="$0" type="text" inputmode="numeric" oninput="fmtInpG(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();registrarCompraRapida();}"></div>
+      <div class="field"><div class="lbl">Descripción <span style="color:var(--t3);font-weight:400;text-transform:none">(opcional)</span></div><input class="inp" id="cr-desc" placeholder="Ej: pedido frutas martes" type="text" onkeydown="if(event.key==='Enter'){event.preventDefault();registrarCompraRapida();}"></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-full" style="background:var(--red);color:#fff" onclick="registrarCompraRapida()">Registrar</button>
