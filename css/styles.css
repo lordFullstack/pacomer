@@ -649,7 +649,7 @@ header {
 
 @media (max-width: 768px) {
   /* ── Header (chrome compartido, no forma parte de la composición de Mesas) ── */
-  .firma-header { display: none; }
+  .firma-header { height: 30px; margin-left: 8px; }
   header { flex-wrap: wrap; height: auto; min-height: 56px; padding: 8px 12px; row-gap: 6px; }
   .nav { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
   .nav-btn { padding: 8px 12px; }
