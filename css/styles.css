@@ -32,6 +32,8 @@ header {
 }
 .brand { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--accent); }
 .brand span { color: var(--t2); font-weight: 600; }
+.brand { display: flex; align-items: center; gap: 6px; }
+.firma-header { height: 40px; width: auto; margin-left: 10px; opacity: .9; }
 .nav { display: flex; gap: 2px; background: var(--s2); border-radius: var(--r-sm); padding: 3px; }
 .nav-btn { padding: 6px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; color: var(--t2); border: none; background: transparent; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .nav-btn.active { background: var(--s1); color: var(--t1); }
@@ -647,6 +649,7 @@ header {
 
 @media (max-width: 768px) {
   /* ── Header (chrome compartido, no forma parte de la composición de Mesas) ── */
+  .firma-header { display: none; }
   header { flex-wrap: wrap; height: auto; min-height: 56px; padding: 8px 12px; row-gap: 6px; }
   .nav { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
   .nav-btn { padding: 8px 12px; }
