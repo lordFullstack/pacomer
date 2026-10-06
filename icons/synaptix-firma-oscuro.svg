@@ -10,8 +10,8 @@
     </linearGradient>
   </defs>
   <g font-family="system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
-    <text x="50" y="140" font-size="110" font-weight="800" fill="#FFFFFF" letter-spacing="-1">Synaptix</text>
-    <text x="50" y="240" font-size="85" font-weight="400" fill="url(#animatedGrad)" letter-spacing="1">AI Labs</text>
-    <text x="55" y="300" font-size="28" font-weight="400" fill="#A0AABF" letter-spacing="2">Programando con Sistemas Inteligentes</text>
+    <text x="382" text-anchor="middle" y="140" font-size="110" font-weight="800" fill="#FFFFFF" letter-spacing="-1">Synaptix</text>
+    <text x="382" text-anchor="middle" y="240" font-size="85" font-weight="400" fill="url(#animatedGrad)" letter-spacing="1">AI Labs</text>
+    <text x="382" text-anchor="middle" y="300" font-size="28" font-weight="400" fill="#A0AABF" letter-spacing="2">Programando con Sistemas Inteligentes</text>
   </g>
 </svg>
