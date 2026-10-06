@@ -655,6 +655,12 @@ header {
   .nav-btn { padding: 8px 12px; }
   .hstats { order: 3; width: 100%; justify-content: flex-start; }
 
+  /* ── Mesas: el panel de registro pasa debajo de la lista (antes ocupaba 320px fijos y dejaba ~55px a las mesas) ── */
+  #page-mesas { flex-direction: column; overflow-y: auto; }
+  .mesas-main { flex: none; padding: 12px; overflow: visible; }
+  .reg-panel { width: 100%; flex: none; border-left: none; border-top: 1px solid var(--border); }
+  .reg-body { overflow: visible; }
+
   /* ── Clientes / Proveedores: lista + detalle apilados (drill-down) ── */
   #page-clientes, #page-proveedores { position: relative; }
   .list-panel { width: 100%; }
