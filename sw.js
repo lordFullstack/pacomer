@@ -6,7 +6,7 @@
 // IMPORTANTE: subir CACHE_NAME (p.ej. 'pacomer-shell-v3') cada vez que
 // cambie la lista de archivos de APP_SHELL, para que el navegador note
 // que este archivo cambio y dispare el ciclo de actualizacion.
-var CACHE_NAME = 'pacomer-shell-v3';
+var CACHE_NAME = 'pacomer-shell-v4';
 var APP_SHELL = [
   './',
   './index.html',
@@ -34,7 +34,8 @@ var APP_SHELL = [
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
   './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  './icons/synaptix-firma-oscuro.svg'
 ];
 
 self.addEventListener('install', function(event) {
